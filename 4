@@ -1,0 +1,163 @@
+Una de las cosas que mas ha transformado mi vida (informáticamente hablando) es el conocimiento sobre el funcionamiento del protocolo ssh.
+
+Yo aprendí a usar ssh por envidia, envidia a aquellos que lo usaban fácilmente. De ahí partí a mi búsqueda de entender tal herramienta, ahora indispensable donde vaya. Esta es la historia de mis años en los que entender esas maneras se hizo indispensable en mi propio funcionamiento.
+
+Diremos pues a modo de introducción, que SSH es una forma de conectarse a otras maquinas remotamente, ya sea para ejecutar instrucciones por terminal, o para transferencia de ficheros, entre otros. [SSH en wikipedia](http://es.wikipedia.org/wiki/Secure_Shell)
+
+Experimento #01: La diferencia entre el cliente y el servidor
+=============================================================
+
+Existe una diferencia básica entre usar ssh y oír peticiones ssh. Poniéndolo en mis propias palabras, oír (o aceptar) peticiones ssh implica tener instalado un servidor ssh escuchando peticiones por el puerto 22 (o otro puerto configurado para eso).
+
+Pero como es maldición miá que nadie pueda entenderme, mas fácil enlazar a un experto digo yo. [Manual de OpenSSH](http://doc.ubuntu-es.org/Servidor_OpenSSH)
+
+Entonces tenemos las siguientes instrucciones:
+
+<pre class="prettyprint lang-sh linenums"><code>
+    # para instalar el servidor tenemos:
+    sudo apt-get install openssh-server
+
+    # y para instalar el cliente tenemos:
+    sudo apt-get install openssh-client
+</code></pre>
+
+Conclusión:
+-----------
+Instalar el cliente implica tener el comando ssh, instalar el servidor implica tener un [demonio](http://es.wikipedia.org/wiki/Demonio_%28inform%C3%A1tica%29) que escucha peticiones ssh por algunos puertos configurados en tu computadora.
+
+Experimento #02: Conectarse a otra computadora
+==============================================
+
+Lo mas esencial en ssh es el acceso a una maquina remota (que tenga instalado el demonio ssh).
+
+<pre class="prettyprint lang-sh linenums"><code>
+    # user: es la cuenta que se tiene en la maquina remota
+    # server: es el dominio o ip de la maquina remota
+    ssh user@server
+</code></pre>
+
+Pero dicen por ahí, que para muestra basta una captura, así que aquí esta:
+![ssh1](http://blog.scesi.org/wp-content/uploads/2013/03/ssh1.png "Uso del comando ssh")
+
+La opción "-p 28" es para conectarse al servidor ssh por el puerto 28 en lugar del puerto 22, esto es porque a veces se bloquea el puerto 22, como si eso fuera a detener a alguien, normalmente puedes usar otros [puertos clasicos](http://es.wikipedia.org/wiki/Anexo:N%C3%BAmeros_de_puerto), por ejemplo:
+
+* 25 -> correo electrónico
+* 28 -> libre y sin compromisos
+* 53 -> dns
+* 80 -> servidor web
+* cualquiera de los otros 65530 puertos disponibles
+
+Experimento #03: Copiar archivos de aquí para allá, y viceversa
+===============================================================
+
+Otro de los usos geniales de ssh es la copia remota de ficheros, esto es muy parecido a usar el comando cp. [Mas detalles aqui](http://www3.uji.es/~galdu/ssh_vs_rsh/x165.html)
+
+<pre class="prettyprint lang-sh linenums"><code>
+    # copiar desde un servidor remoto a mi maquina
+    scp user@server:path_remoto path_local
+    # copiar desde mi maquina a un servidor remoto
+    scp path_local user@server:path_remoto
+</code></pre>
+
+Y para aquellos que solo 'ver para creer' es consigna suprema:
+![ssh2](http://blog.scesi.org/wp-content/uploads/2013/03/ssh2.png "Uso del comando scp")
+
+Experimento #04: Criptografía asimétrica y la generación de llaves
+==================================================================
+
+[La criptografía asimétrica](http://es.wikipedia.org/wiki/Criptograf%C3%ADa_asim%C3%A9trica) es la misma esencia del protocolo SSH, el propósito original de su construcción, y si mecánica fundamental.
+
+Así que primero la captura de pantalla, y luego la explicación:
+![ssh3](http://blog.scesi.org/wp-content/uploads/2013/03/ssh3.png "Generación de las llaves ssh")
+
+El proceso esencialmente consiste en el intercambio de llaves publicas (el fichero id_rsa.pub) entre el servidor y el cliente, esto hace innecesario la solicitud de contraseñas, ademas de mejorar la seguridad de la conexión. Puede ahondarse en el tema [aquí mero](http://www.guyrutenberg.com/2007/10/05/ssh-keygen-tutorial-generating-rsa-and-dsa-keys/).
+
+Para entender eso del passphrase, pueden ver [aqui](http://www.gentoo.org/doc/es/articles/openssh-key-management-p1.xml), y luego [aqui](http://www.gentoo.org/doc/es/articles/openssh-key-management-p2.xml).
+
+Experimento #05: El archivo ~/.ssh/authorized_keys
+==================================================
+
+Para configurar el acceso automático a un servidor remoto, se debe tener registrada la llave publica (archivo id\_rsa.pub) en el archivo ~/.ssh/authorized_keys (este contiene una lista de las claves publicas que no requieren contraseña para acceder al servidor).
+
+![ssh4](http://blog.scesi.org/wp-content/uploads/2013/03/ssh4.png "Configurando el servidor para que acceder sin necesidad de pedir una contraseña")
+
+Esta forma de acceso es muy útil a la hora de realizar scripts para automatizar tareas con el uso de la herramienta [cron](http://es.wikipedia.org/wiki/Cron_%28Unix%29)
+
+Experimento #06: El archivo ~/.ssh/known_hosts
+==============================================
+
+Cuando se realiza una conexión vía ssh, internamente se realiza una negociación entre el cliente y el servidor, estos intercambian sus llaves publicas, toda llave publica de una conexión esta almacenada en el fichero known_hosts.
+
+Una de los problemas clásicos sobre el intercambio reciproco de llaves publicas, es cuando cambias de llave publica del servidor, o si esta cambia de IP todo el tiempo (por uso de dhcp, por ejemplo).
+
+Puede presentarse una situación como esta:
+![ssh12](http://blog.scesi.org/wp-content/uploads/2013/03/ssh12.png)
+
+Para solucionarse esto nada mas basta con eliminar la entrada de la computadora que cambio de llave o que tenia el ip anteriormente en la maquina cliente.
+![ssh13](http://blog.scesi.org/wp-content/uploads/2013/03/ssh13.png)
+
+Experimento #07: Git y el protocolo SSH
+=======================================
+
+Git es un controlador de versiones ([Git en wikipedia](http://es.wikipedia.org/wiki/Git)), y sin entrar en muchos detalles, utiliza el protocolo ssh para realizar sus actividades.
+
+Git cuenta con muchos repositorios públicos para los desarrolladores, si tu eres uno de aquellos, lo mas probable es que te topes con [github](https://github.com/), este como cualquier otro, utiliza muchos modos para la subida y la descarga de los recursos de un proyecto.
+
+Esencialmente, se requiere realizar un intercambio de llaves publicas, por medio de la página web de github [Manuales SSH en Github](https://help.github.com/categories/56/articles). De hecho los manuales de github fueron los primeros rayos de luz profunda que yo recibí acerca de ssh, y son muy buenos.
+
+Experimento #08: ¿No te funciona la conexión SSH?
+=================================================
+
+Puede darse el siguiente caso:
+![ssh5](http://blog.scesi.org/wp-content/uploads/2013/03/ssh5.png)
+
+Esto es un timeout (tiempo de respuesta expirado), en la conexión entre el servidor y el cliente, y puede darse por múltiples motivos.
+
+En mi corta experiencia choque con dos posibilidades:
+
+Posibilidad #1
+--------------
+Alguien bloqueo (o filtró) el puerto que utilizabas para la conexión.
+Si pasa eso lo mejor es que configures puerto adicionales para la escucha del demonio ssh.
+
+Posibilidad #2
+--------------
+Alguien bloqueo (o filtró) el protocolo ssh, independiente del puerto que utilizaras.
+Aquí en el Laboratorio de Desarrollo me paso eso, probé incluso configurando el servidor ssh por el puerto 80, el puerto que con mas probabilidad de estar abierto.
+
+Y nada.
+
+Hasta que un día de tanto buscar choque con la [solución](http://www.zeitoun.net/articles/ssh-through-http-proxy/start), básicamente lo que creo que hace es envolver la petición ssh en un paquete http. Y me funciono.
+
+Después de compilar el [archivo](http://yachay.scesi.org/files/9/download) en c, y copiarlo a su respectivo lugar, muestro la configuración que realice (basada en el manual anterior claro).
+![ssh6](http://blog.scesi.org/wp-content/uploads/2013/03/ssh6.png)
+
+Experimento #09: El archivo ~/.ssh/config
+=========================================
+
+Como vimos en la sección anterior, el archivo config, sirve para configurar condiciones especificas para alguna conexión, este [manual](http://www.gsp.com/cgi-bin/man.cgi?topic=ssh_config) da algunas pistas de lo que podríamos hacer. Una de las cosas útiles es configurar el puerto, para que no sea necesario colocarlo en cada ejecución del comando.
+
+Experimento #10: Tuuuuneles
+===========================
+
+Para terminar, un dia se presento la necesidad de ver un video en youtube, y sas, que te caen con esto:
+![ssh7](http://blog.scesi.org/wp-content/uploads/2013/03/ssh7.png)
+
+Entonces me dije, jamas!!, y ahí es donde aprendí a hacer [tuneles](http://es.wikipedia.org/wiki/T%C3%BAnel_%28inform%C3%A1tica%29), para esto use un comando que me pasaron unos colegas anónimos.
+
+![ssh8](http://blog.scesi.org/wp-content/uploads/2013/03/ssh8.png)
+
+Esta ventana se queda así, pero si hacemos un nmap a nuestra propia maquina vemos que el puerto 9090 (ese que configuramos) esta a la escucha de peticiones:
+
+![ssh9](http://blog.scesi.org/wp-content/uploads/2013/03/ssh9.png)
+
+Así que configuramos nuestro firefox, y vemos el fucking video.
+![ssh10](http://blog.scesi.org/wp-content/uploads/2013/03/ssh10.png)
+![ssh11](http://blog.scesi.org/wp-content/uploads/2013/03/ssh11.png)
+
+En fin, esos fueron algunos truquillos de mi cotidiano vivir, la verdad es que recapitulando, y haciendo este articulo, hasta descubrí nuevas cosas.
+
+Así que la próxima vez que un administrador de servidores, decrete que no puedes usar el protocolo SSH por que es peligroso (para el), miralo a los ojos directamente y dile: "Nein, überhaupt nicht!".
+
+Siempre que pienso en eso, llega a mi mente esta caricatura:
+[![9gag](http://blog.scesi.org/wp-content/uploads/2013/03/2314898_700b.jpg)](http://9gag.com/gag/2314898)

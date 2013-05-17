@@ -1,0 +1,177 @@
+Y de repente se hizo 2006, terminaron los años jacobeos y comienzo los primeros meses de mis años azul pálido, ahí en ese contexto sucedió que con 2 amigos, decidimos crear una banda musical. Siendo como siempre fue, llegue tarde a la repartición de instrumentos, así fue como destino me transformo en baterista aficionado.
+
+Si algo dejo mi percusionada experiencia musical, será que aprendí mucho sobre la *serenidad*, cosa curiosa, pero cuando alguien esta delante de una batería enciende abruptamente su paroxismo interior, y tiende a tocar todo lo que puede, resultando directamente en un ruido infernal; así que diremos que hasta para las cosas mas pequeñas, rastros propios de disciplina es imperativa.
+<!--more-->
+
+Intenciones y atenciones después, ya algo medio prometedor salia de mis baquetas. Fueron los tiempos en que descubrí la pagina [musycom.com](http://www.musycom.com/ia5_musycom/). Ahí ademas fue donde aprendí a leer partituras. Particularmente la [notación para batería](https://en.wikipedia.org/wiki/Percussion_notation) no es tan intrincada.
+
+Preámbulos mas, preámbulos menos, pasemos a la informática de esas pequeñas cosas.
+
+911Tabs
+-------
+
+Lo que yo hacia en esos tiempos era conseguir un archivo MIDI, lo leía, y probaba con [Fruity Loops](https://en.wikipedia.org/wiki/Fruity_Loops).
+
+Poco después note que era mas fácil conseguir archivos gp5 (para el programa [Guitar Pro](https://en.wikipedia.org/wiki/Guitar_Pro), ahí fue donde descubrí el sitio [911Tabs](http://www.911tabs.com/), la mayor parte de estas están dibujadas como tablatura, o en archivos para Guitar Pro.
+
+Primeros inconvenientes
+-----------------------
+
+Pero como siempre, había un problema, bueno en realidad, habían dos problemas:
+
+1. Solo es posible encontrar canciones populares, lo que impide poder sacar covers de las canciones que tu decidas.
+2. La mayor parte de las partituras están hechas para guitarra, haciendo que la parte de percusión, sea muy pobre, en cuanto a la fidelidad con su pieza original.
+
+Refinando las partituras
+------------------------
+
+Fue en esa situación, contando los curiosos precedentes, que decidí editar mis propias partituras; si encontraba una partitura decente, la revisaría al detalle de modo que pueda sonar tal y como la canción original.
+
+Corregir una partitura es cuestión de mucha paciencia, se tiene que escuchar el tema musical varias veces, identificando cada componente, el tema que mas me hizo trabajar fue [Brianstorm](https://www.youtube.com/watch?v=30w8DyEJ__0) de Arctic Monkeys.
+
+<iframe width="640" height="360" src="http://www.youtube.com/embed/30w8DyEJ__0" frameborder="0" allowfullscreen></iframe>
+
+Posteriormente me enamore del tema [The View from the Afternoon](https://www.youtube.com/watch?v=PeQAZsyucbQ), bastante inspirador a mi gusto.
+
+<iframe width="640" height="360" src="http://www.youtube.com/embed/PeQAZsyucbQ" frameborder="0" allowfullscreen></iframe>
+
+Si se puede obtener una base (una partitura medio decente) del tema, solo es cuestión de corregir las golpes que podrían faltar. Es peor cuando no se cuenta con información del tema, ya que lo primero que se necesita es calcular el tiempo y el tipo de [compás](https://es.wikipedia.org/wiki/Comp%C3%A1s_musical) que tiene el tema. La mayor parte de los temas de rock que analice, usan el compás de cuatro cuartos (4/4).
+
+Calcular el tiempo es algo mas intrincado.
+
+Calcular el tiempo de un compás
+-------------------------------
+
+Para calcular el tiempo de un compás, escribí el siguiente código en java, lo que hice fue calcular los intervalos. Para eso, identifico el sonido del tambor, y por cada uno de ellos presiono el **espacio**, para comenzar los contadores esta la tecla **enter**, solo funciona con compases de tipo 4/4.
+
+<pre class="prettyprint lang-java linenums"><code>import java.awt.event.*;
+import java.awt.*;
+import java.util.ArrayList;
+import javax.swing.*;
+
+public class Metro extends JFrame implements KeyListener {
+    Clock clock;
+    boolean running = false;
+    ArrayList<Double> values;
+    double pre = 0;
+
+    public Metro() {
+        super("Metronomo");
+
+        this.clock = new Clock();
+        this.values = new ArrayList<Double>();
+
+        this.addKeyListener(this);
+
+        this.pack();
+        this.setSize(300, 300);
+        this.setLocationRelativeTo(null);
+    }
+
+    public void paint(Graphics g) {
+        super.paint(g);
+
+        int sum = 0;
+        int siz = this.values.size();
+        for (int i = 0; i < siz; i++) {
+            sum += this.values.get(i);
+        }
+        if (sum != 0) {
+        double prom = sum / siz;
+            g.drawString(prom + "", 100, 100);
+        } else {
+            g.drawString("0", 100, 100);
+        }
+    }
+
+    public static void main (String...args) {
+        Metro m = new Metro();
+        m.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        m.setVisible(true);
+    }
+
+    public void keyPressed(KeyEvent e) { this.keyTyped(e); }
+    public void keyReleased(KeyEvent e) { }
+    public void keyTyped(KeyEvent e) {
+        int k = e.getKeyCode();
+        if (k == KeyEvent.VK_SPACE) {
+            if (!running) {
+                clock.start();
+                running = true;
+            } else {
+                clock.stop();
+                running = false;
+            }
+        }
+        if (k == KeyEvent.VK_ENTER) {
+            if (running) {
+                double cur = clock.count();
+                double bpm = 60.0 / ((cur - pre) / 4.0);
+                pre = cur;
+                this.values.add(bpm);
+                this.repaint();
+                
+                System.out.println("-> " + bpm);
+            }
+        }
+    }
+}
+
+class Clock implements Runnable {
+    private Thread cronometer;
+    private long startTime;
+    private long currTime;
+    private boolean run;
+
+    public void start() {
+        this.cronometer = new Thread(this);
+        this.cronometer.start();
+        this.startTime = System.currentTimeMillis();
+        this.run = true;
+    }
+
+    public void stop() {
+        run = false;
+        this.cronometer.interrupt();
+        this.cronometer = null;
+    }
+
+    public double count() {
+        return (double)((currTime - startTime) / 1000.000);
+    }
+
+    public void run() {
+        while (run) {
+            try {
+                Thread.sleep(100);
+            } catch (Exception e) {}
+            currTime = System.currentTimeMillis();
+        }
+    }
+}</code></pre>
+
+Y digo....¡Éxito!
+
+Drum covers
+-----------
+
+Después de tener la partitura corregida, es bueno ver si alguien ya saco un drum cover, osea, una grabación de video de como tocar el tema. Normalmente los temas que representan un reto musical tienen drum covers, algunos buenos, y otros no tanto.
+
+Por ejemplo tenemos, el drum cover de [Brianstorm](https://www.youtube.com/watch?v=Up5DC1udbeM), asi uno puede ver la técnica necesaria para interpretar el tema.
+
+<iframe width="640" height="360" src="http://www.youtube.com/embed/Up5DC1udbeM" frameborder="0" allowfullscreen></iframe>
+
+TuxGuitar e Hydrogen
+--------------------
+
+Para aquellos que luchan por su libertad, también existe [TuxGuitar](http://sourceforge.net/projects/tuxguitar/?source=dlp) en equivalencia de Guitar Pro, y [Hydrogen](https://en.wikipedia.org/wiki/Hydrogen_%28software%29) en equivalencia a Fruity Loops.
+
+Particularmente estas equivalencias aun poseen divergencias amplias, para muestra muestro una captura de Guitar Pro y TuxGuitar.
+
+![guitarpro](http://blog.scesi.org/wp-content/uploads/2013/04/bateria1.png "Brianstorm en Guitar Pro 5")
+
+![tuxguitar](http://blog.scesi.org/wp-content/uploads/2013/04/bateria2.png "Brianstorm en TuxGuitar")
+
+Triste, pero cierto, aun TuxGuitar no tiene una notación adecuada para los bateristas, pronto!, eso dicen.
+
+Y así fue como mi carácter apagado, tuvo una renovación de tales ínfulas innatas; obsesión, suspicacia, paciencia, y docilidad, ahora campan a sus anchas en recorrido. Ahora ya comprendo que el tiempo oxida todas las cosas, ya sean materiales o inmateriales; ya sean de este mundo o solo vivan en la imaginación de los hombres.

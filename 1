@@ -1,0 +1,57 @@
+Bueno, yo fui un viejo usuario de un ipod video, el pobre sufrió una cruel muerte (se ahogo), pero como decimos por acá, esa es otra historia. El punto es, que ahora que uso un miserable mp3 player, descubro un día obnubilado que podría crear un script para sincronizar mis listas de mpd y dejar de sufrir por aquello que se perdió. Pero vamos por pasos:
+
+**Paso 1:**
+Lo primero que hice, fue ubicar la carpeta de las listas de mpd lo encontré en /var/lib/mpd/playlist y me cree una carpeta en /var/lib/mpd/player, para usar la misma lógica que es usada en el servidor apache con la configuración de host virtuales.
+
+**Paso 2:**
+Enlace en la carpeta player los archivos correspondientes a las listas que quería sincronizar.
+
+**Paso 3:**
+Escribí el fucking script:
+
+<pre class="prettyprint linenums lang-sh"><code>#!/bin/bash
+
+cd ~
+
+mount /mnt/usb
+rm -rf /mnt/usb/Music/*
+
+MUSIC_DIR="/media/music"
+PLAYER_DIR="/mnt/usb/Music"
+LIST_DIR="/var/lib/mpd/player"
+
+IFS=$'\x0A'$'\x0D'
+for playlist in `ls $LIST_DIR`
+do
+    while read file
+    do
+        PARENT=`dirname $PLAYER_DIR/$file`
+        if test -d $PARENT
+        then
+            true
+        else
+            mkdir --parents $PARENT
+        fi
+        if test -a $PLAYER_DIR/$file
+        then
+            true
+        else
+            cp -v $MUSIC_DIR/$file $PLAYER_DIR/$file
+        fi
+    done < "$LIST_DIR/$playlist"
+done
+
+umount /mnt/usb</code></pre>
+
+Obviamente concentre varias funciones que encontré en Internet, particularmente en stackoverflow.
+
+**Paso 4:**
+Ejecute el script y fui feliz por unos días. Jure un día refinar el asunto para que no sea tan inconsciente a la hora de ciertas apreciaciones.
+
+Ideas para refinar el script:
+
+* Controlar el punto de montaje y verificar si no es que ya se monto automáticamente.
+* No borrar inútilmente todo el pendrive, sino comprobar cambios en los ficheros (nuevos temas agregados, temas eliminados, y temas que cambiaron la información (o meta-información) que poseían.
+* Quitarle tanto [hardcode](http://es.wikipedia.org/wiki/Hard_code) que anda suelto por aquí y por allá.
+
+Y bueno, esa fue la historia de como un día una sonrisa esbozo mi cara y luego se fue.

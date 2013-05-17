@@ -1,0 +1,243 @@
+Como el curioso personaje que he decidido ser, una de mis extrañas características se refleja en mi curiosa doctrina de: "la diversificación antes que la competencia", curioso lema que cargo conmigo.
+
+Es así que por ejemplo uso [Gentoo](http://www.gentoo.org/) y no Ubuntu; [awesome](http://awesome.naquadah.org/) en lugar de GNOME o KDE, entre otros innumerables ejemplos, y de hecho esta es la historia de una de esas diversificaciones ([nginx](http://nginx.org/) y no apache).
+
+Diremos que todo comenzó con un servidor Pentium III, y la necesidad de que funcionase como un servidor pleno, para darle unos aires mas familiares al asunto, llamaremos de aquí entrante a aquel servidor Pentium III: *jalapeño*. Pero como todas las cosas reflejan a todas las demás cosas, vamos por pasos:
+
+Paso 1:
+=======
+
+Tener entre mis manos al servidor jalapeño.
+![jalapeño1](http://blog.scesi.org/wp-content/uploads/2013/03/jalapeño3.jpg "jalapeño al alcance de mis manos")
+![jalapeño2](http://blog.scesi.org/wp-content/uploads/2013/03/jalapeño4.jpg "jalapeño al desnudo")
+
+Paso 2:
+=======
+
+Instalar Gentoo Linux. Únicamente para fines documentales, adjunto las características del hardware (para nosotros la ***gentoo*sa**, es oro puro). Saltare las noches de compilación, los días de configuraciones interminables, y el constante resonar de la aflicción en mi cerebro (la de ahora y la de aquel entonces).
+
+![jalapeño3](http://blog.scesi.org/wp-content/uploads/2013/03/jalapeño.png "lspci -v del jalapeño")
+![jalapeño4](http://blog.scesi.org/wp-content/uploads/2013/03/jalapeño2.png "cpuinfo y free en el jalapeño")
+
+Paso 3:
+=======
+
+Compilar e instalar nginx.
+No es intención mia (nunca lo ha sido) hacerme al papi de las compilaciones, de hecho gran parte de todos mis dias, no estoy seguro de como hacer las cosas, solo voy probando cosas hasta que funcionan como creo conveniente. Asi que ahora paso a mostrar los USE FLAGS que utilize en la compilación de mi nginx. Lamentablemente el servidor jalapeño esta caido justo ahora, asi que muestro como se ve en mi servidor casero, tecnicamente es la misma configuración (cuestión de fe, nada más).
+
+<pre class="prettyprint lang-sh linenums"><code>
+    # /etc/portage/package.use
+    www-servers/nginx -ipv6 vim-syntax
+
+    # /etc/make.conf ahora transformado en /etc/portage/make.conf
+    NGINX_MODULES_HTTP="access auth_basic autoindex browser charset empty_gif fastcgi gzip proxy referer rewrite userid xslt"
+    NGINX_MODULES_MAIL=""
+</code></pre>
+
+![jalapeño5](http://blog.scesi.org/wp-content/uploads/2013/03/jalapeño5.png "emerge de nginx")
+
+Paso 4:
+=======
+
+Entender como usar nginx.
+Para continuar con mis aprendizajes acerca de nginx, lei el manual wiki de gentoo [Gentoo Linux Wiki](http://en.gentoo-wiki.com/wiki/Nginx), e instale php-fpm, para usar fastcgi.
+
+<pre class="prettyprint lang-sh linenums"><code>
+    # /etc/portage/package.use
+    dev-lang/php curl fpm gd mysql mysqli pdo sockets truetype xmlreader xmlwriter xsl zip
+</code></pre>
+
+![jalapeño6](http://blog.scesi.org/wp-content/uploads/2013/03/jalapeño6.png "php con php-fpm")
+
+Jaja, necesito actualizar mis paquetes. Luego inicialice mis servidores:
+
+<pre class="prettyprint lang-sh linenums"><code>
+    /etc/init.d/php-fpm start
+    /etc/init.d/nginx start
+
+    # haciendo que arranquen con el sistema
+    rc-update add php-fpm default
+    rc-update add nginx default
+</code></pre>
+
+Paso 5:
+=======
+
+Escribir configuraciones para el servidor.
+La primera vez que vi la configuración de nginx, puse cara de patata, asi que fui hasta la fuente [configuraciones de nginx](http://wiki.nginx.org/Configuration)
+
+Y sufri, sufri muchos dias, hasta entender como funcionan las configuraciones, al final me quede con estas configuraciones:
+
+<pre class="prettyprint linenums"><code>
+    # 01_main.conf (configuración principal del servidor)
+    server {
+        listen 80 default_server;
+        server_name localhost;
+        root /var/www/main.local;
+
+        access_log /var/log/nginx/localhost.access_log main;
+        error_log /var/log/nginx/localhost.error_log debug;
+
+        include /etc/nginx/drop.conf;
+
+        # Frontpage configuration
+        location = / {
+            include /etc/nginx/fastcgi.conf;
+            include /etc/nginx/php.conf;
+        }
+
+        location ~* \.(css|js|png|jpg)$ {
+            access_log off;
+        }
+
+        location / {
+            return 404;
+        }
+    }
+</code></pre>
+
+<pre class="prettyprint linenums"><code>
+    # /etc/nginx/drop.conf
+    location = /robots.txt  { access_log off; log_not_found off; }
+    location = /favicon.ico { access_log off; log_not_found off; }
+    location ~ /\.          { access_log off; log_not_found off; deny all; }
+    location ~ ~$           { access_log off; log_not_found off; deny all; }
+</code></pre>
+
+<pre class="prettyprint linenums"><code>
+    # /etc/nginx/fastcgi.conf
+
+    fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+    fastcgi_param QUERY_STRING $query_string;
+    fastcgi_param REQUEST_METHOD $request_method;
+    fastcgi_param CONTENT_TYPE $content_type;
+    fastcgi_param CONTENT_LENGTH $content_length;
+
+    fastcgi_param SCRIPT_NAME $fastcgi_script_name;
+    fastcgi_param REQUEST_URI $request_uri;
+    fastcgi_param DOCUMENT_URI $document_uri;
+    fastcgi_param DOCUMENT_ROOT $document_root;
+    fastcgi_param SERVER_PROTOCOL $server_protocol;
+    fastcgi_param HTTPS $https if_not_empty;
+
+    fastcgi_param GATEWAY_INTERFACE CGI/1.1;
+    fastcgi_param SERVER_SOFTWARE nginx/$nginx_version;
+
+    fastcgi_param REMOTE_ADDR $remote_addr;
+    fastcgi_param REMOTE_PORT $remote_port;
+    fastcgi_param SERVER_ADDR $server_addr;
+    fastcgi_param SERVER_PORT $server_port;
+    fastcgi_param SERVER_NAME $server_name;
+
+    # PHP only, required if PHP was built with --enable-force-cgi-redirect
+    fastcgi_param REDIRECT_STATUS 200;
+</code></pre>
+
+<pre class="prettyprint linenums"><code>
+    # /etc/nginx/php.conf
+    fastcgi_pass 127.0.0.1:9000;
+    fastcgi_index /index.php;
+</code></pre>
+
+<pre class="prettyprint linenums"><code>        
+    # configuracion para la instalacion de cacti (uso principal (pero no unico) del jalapeño)
+    server {
+        listen 80;
+        server_name cacti.local;
+        root /var/www/localhost/cacti;
+        index index.php;
+
+        access_log /var/log/nginx/cacti.access_log main;
+        error_log /var/log/nginx/cacti.error_log debug;
+
+        include /etc/nginx/drop.conf;
+        location / {
+            if (!-f $request_filename) {
+                rewrite ^(.*)$ /index.php last;
+                break;
+            }
+        }
+
+        location ~ \.php$ {
+            include /etc/nginx/fastcgi.conf;
+            fastcgi_pass 127.0.0.1:9000;
+            fastcgi_index /index.php;
+        }
+    }
+</code></pre>
+
+<pre class="prettyprint linenums"><code>
+    # configuración para babel (basado en el framework zend 1.2)
+    server {
+        listen 80;
+        server_name babel.local;
+        root /var/www/localhost/babel/public;
+        index index.php;
+
+        access_log /var/log/nginx/babel.access_log main;
+        error_log /var/log/nginx/babel.error_log debug;
+
+        include /etc/nginx/drop.conf;
+        location / {
+            if (!-f $request_filename) {
+                rewrite ^(.*)$ /index.php last;
+                break;
+            }
+        }
+
+        location ~ \.php$ {
+            include /etc/nginx/fastcgi.conf;
+            fastcgi_pass 127.0.0.1:9000;
+            fastcgi_index /index.php;
+            fastcgi_param APPLICATION_ENV dev_babel_0;
+        }
+    }
+</code></pre>
+
+<pre class="prettyprint linenums"><code>
+    # configuracion para un sistema que estoy haciendo (basado en el framework symfony 1.4)
+    server {
+        listen 80;
+        server_name convocatorias.local;
+        root /var/www/convocatoria.local/web;
+
+        access_log /var/log/nginx/convocatoria.access.log;
+        error_log /var/log/nginx/convocatoria.error.log;
+
+        include /etc/nginx/drop.conf;
+
+        location ~ "^(.+\.php)($|/)" {
+            include /etc/nginx/fastcgi.conf;
+
+            fastcgi_split_path_info ^(.+\.php)(.*)$;
+            fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+            fastcgi_param SCRIPT_NAME $fastcgi_script_name;
+            fastcgi_param PATH_INFO $fastcgi_path_info;
+            fastcgi_param PATH_TRANSLATED $document_root$fastcgi_path_info;
+            fastcgi_pass 127.0.0.1:9000;<br />
+        }
+
+        location ^~ /sf/ {
+            alias /opt/symfony-1.4.18/data/web/sf/;
+        }
+
+        location / {
+            index index.php;
+            try_files $uri $uri/ /index.php$uri?$args;
+        }
+    }
+</code></pre>
+
+Y bueno son las configuraciones que he ido probando, muchas de ellas me costaron mucha navegación en internet, trate de compilar todas mis experimentaciones, incluso algunas pueden ser inseguras. Jure refinarlas algun dia, de todas maneras no son prioridad para mi.
+
+Paso 6:
+=======
+
+Hablar bien de Igor Sysoev.
+![igor_sysoev](http://blog.scesi.org/wp-content/uploads/2013/03/igor_sysoev.jpg "Bravo!")
+
+Bravo Igor Sysoev, bravo.
+
+Bueno creo que resumí mi experiencia con nginx de casi 6 meses. Obviamente no fue fácil, no fue escribirlo y que funcione; cada tecleo es una lucha por llegar al conocimiento pleno del método y al comportamiento de las cosas. Cada día se hace mas un poquito mas fácil, créanlo.
+
+Asi que diremos que la moraleja es, como dice la cancion de los Jaguares: "Arriesgate y vuelve a nacer, cambia esta forma de pensar, y de amar".

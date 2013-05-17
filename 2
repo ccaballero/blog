@@ -1,0 +1,281 @@
+Septiembre siempre es interesante para mi y mis amigos, por varias cosas, aun es mas, diría que los septiembres de mi vida son bastante esperados, uno de esos fue aquel del 2011.
+
+Pues diremos que necesitábamos buscar auspiciadores para un evento que deseábamos iniciar. Viendo la pagina de [fundempresa](http://www.fundempresa.org.bo/), vimos y pensamos, ¿porque no extraemos la información de ahí? mas fácil programarlo que usar el buscador.
+
+Pero como la anterior vez, vamos por pasos:
+
+Paso 1:
+=======
+
+Analice la pagina del [Directorio Empresarial Virtual](http://www.fundempresa.org.bo/directorio/) de la pagina de Fundempresa, ahí note que si no colocabas algo sobre el buscador (exceptuando claro el departamento a buscar), listaba a todas las empresas, y me dije a mi mismo, ¡excelente! Necesito obtener los ids de cada empresa, y luego podré sacar la información de la empresa en cuestión.
+
+Paso 2:
+=======
+
+Luego vi el detalle de la empresa, una linda tabla bien coloreada, me dije a mi mismo, ¡super! Esto me ayudará a construir el esquema de base de datos que requeriré.
+
+Paso 3:
+=======
+
+Planee mis pasos y me dije, mmmm, primero wget a todas las paginas del listado, de modo que pueda extraer todos los ids, luego wget a todas las paginas detalle a partir de ese listado de ids; de ahí en mas extraigo la información de la pagina y la almaceno en archivos después de hacerlos pasar por un filtrado de todo el html que no quiero; de ahí genero un archivo sql con la información, y la ingreso en una base de datos preparada para tal propósito.
+
+Paso 4:
+=======
+
+Diseñe el fucking esquema de la base de datos, y cree una base de datos:
+
+<pre class="prettyprint lang-sql linenums"><code>/* sql/schema.sql */
+DROP TABLE IF EXISTS `empresas`;
+CREATE TABLE `empresas` (
+    `matricula`      varchar(16) NOT NULL,
+    `nombre`         text        NOT NULL,
+    `descripcion`    text        NOT NULL,
+    `tipo`           text        NOT NULL,
+    `contacto`       text        NOT NULL,
+    `nit`            text        NOT NULL,
+    `licencia`       text        NOT NULL,
+    `depto`          text        NOT NULL,
+    `municipio`      text        NOT NULL,
+    `direccion`      text        NOT NULL,
+    `telefono`       text        NOT NULL,
+    `fax`            text        NOT NULL,
+    `email`          text        NOT NULL,
+    `act_general`    text        NOT NULL,
+    `act_primaria`   text        NOT NULL,
+    `act_especifica` text        NOT NULL,
+    PRIMARY KEY (`matricula`)
+) DEFAULT CHARACTER SET latin1;
+
+DROP TABLE IF EXISTS `tipo`;
+CREATE TABLE `tipo` (
+    `tipo`           text        NOT NULL
+) DEFAULT CHARACTER SET latin1;
+
+DROP TABLE IF EXISTS `act_general`;
+CREATE TABLE `act_general` (
+    `act_general`    text        NOT NULL
+) DEFAULT CHARACTER SET latin1;
+
+DROP TABLE IF EXISTS `act_primaria`;
+CREATE TABLE `act_primaria` (
+    `act_primaria`   text        NOT NULL
+) DEFAULT CHARACTER SET latin1;
+
+DROP TABLE IF EXISTS `act_especifica`;
+CREATE TABLE `act_especifica` (
+    `act_especifica` text        NOT NULL
+) DEFAULT CHARACTER SET latin1;
+
+DROP TABLE IF EXISTS `empresa_filtro`;
+CREATE TABLE `empresa_filtro` (
+    `matricula`      varchar(16) NOT NULL,
+    `nombre`         text        NOT NULL,
+    `descripcion`    text        NOT NULL,
+    `tipo`           text        NOT NULL,
+    `contacto`       text        NOT NULL,
+    `nit`            text        NOT NULL,
+    `licencia`       text        NOT NULL,
+    `depto`          text        NOT NULL,
+    `municipio`      text        NOT NULL,
+    `direccion`      text        NOT NULL,
+    `telefono`       text        NOT NULL,
+    `fax`            text        NOT NULL,
+    `email`          text        NOT NULL,
+    `act_general`    text        NOT NULL,
+    `act_primaria`   text        NOT NULL,
+    `act_especifica` text        NOT NULL,
+    PRIMARY KEY (`matricula`)
+) DEFAULT CHARACTER SET latin1;</code></pre>
+
+![fundempresa0](http://blog.scesi.org/wp-content/uploads/2013/03/blog_0.png "Yo y mi gran terminal")
+
+Paso 5:
+=======
+
+Escribi el fucking script (advertencia: me tomo mas tiempo del que parecería parecer (ademas, que el pleonasmo fue a propósito)):
+
+<pre class="prettyprint lang-sh linenums"><code>#!/bin/bash
+
+DEPTO='03' # departamento que uno quiere (Cochabamba)
+URL_LIST='http://www.fundempresa.org.bo/directorio/listado-de-empresas.php?depto='$DEPTO'&page='
+URL_EMPS='http://www.fundempresa.org.bo/directorio/ver-mas.php?id=' USER_AGENT=''
+let PAGE=1 # contador de paginas
+let COUNT=15 # conteo del paginador
+mkdir pages
+while [ $COUNT -ne 0 ];
+do
+    wget --output-document=pages/page$PAGE.html --user-agent='$USER_AGENT' $URL_LIST
+    $PAGE COUNT=`grep ver-mas.php pages/page$PAGE.html --count`
+    let PAGE=$PAGE+1
+done
+grep -h 'ver-mas.php' pages/page*.html | awk '{print substr($2,22,32)}' < id_pages
+let PAGE=1
+mkdir empresas
+while read line
+do
+    wget --output-document=empresas/empresa$PAGE.html --user-agent='$USER_AGENT' $URL_EMPS$line
+    let PAGE=$PAGE+1
+done < id_pages
+mkdir infos
+let TOTAL=`wc -l id_pages | awk '{print $1}'`
+for PAGE in $(seq 1 $TOTAL)
+do
+    awk 'NR==506{print $0}' empresas/empresa$PAGE.html | awk '{print $1}' >> infos/info_0
+    awk 'NR==512{print $0}' empresas/empresa$PAGE.html >> infos/info_1
+    awk 'NR==519{print $0}' empresas/empresa$PAGE.html >> infos/info_2
+    awk 'NR==526{print $0}' empresas/empresa$PAGE.html >> infos/info_3
+    awk 'NR==533{print $0}' empresas/empresa$PAGE.html >> infos/info_4
+    awk 'NR==540{print $0}' empresas/empresa$PAGE.html >> infos/info_5
+    awk 'NR==547{print $0}' empresas/empresa$PAGE.html >> infos/info_6
+    awk 'NR==554{print $0}' empresas/empresa$PAGE.html >> infos/info_7
+    awk 'NR==560{print $0}' empresas/empresa$PAGE.html >> infos/info_8
+    awk 'NR==567{print $0}' empresas/empresa$PAGE.html >> infos/info_9
+    awk 'NR==574{print $0}' empresas/empresa$PAGE.html >> infos/info_10
+    awk 'NR==581{print $0}' empresas/empresa$PAGE.html >> infos/info_11
+    awk 'NR==588{print $0}' empresas/empresa$PAGE.html >> infos/info_12
+    awk 'NR==600{print $0}' empresas/empresa$PAGE.html >> infos/info_13
+    awk 'NR==607{print $0}' empresas/empresa$PAGE.html >> infos/info_14
+    awk 'NR==614{print $0}' empresas/empresa$PAGE.html >> infos/info_15
+    echo $PAGE
+done
+php parse.php > sql/data.sql
+DB_USER='carlos'
+DB_PASS='asdf'
+DB_NAME='fundempresa'
+mysql --user=$DB_USER --password=$DB_PASS --database=$DB_NAME < sql/schema.sql
+mysql --user=$DB_USER --password=$DB_PASS --database=$DB_NAME < sql/data.sql
+mysql --user=$DB_USER --password=$DB_PASS --database=$DB_NAME < sql/fixes.sql</code></pre>
+
+Obviamente lo escribí en partes, y reuní todas las partes para parecer mas interesante, en la vida real no lo hice de una ejecución. Ademas necesite de un script en php (parse.php), que me genero un archivo sql con la informacion extraida:
+
+<pre class="prettyprint lang-php linenums"><code>&lt;?php
+
+$fd0 = fopen('infos/info_0', 'r');
+$fd1 = fopen('infos/info_1', 'r');
+$fd2 = fopen('infos/info_2', 'r');
+$fd3 = fopen('infos/info_3', 'r');
+$fd4 = fopen('infos/info_4', 'r');
+$fd5 = fopen('infos/info_5', 'r');
+$fd6 = fopen('infos/info_6', 'r');
+$fd7 = fopen('infos/info_7', 'r');
+$fd8 = fopen('infos/info_8', 'r');
+$fd9 = fopen('infos/info_9', 'r');
+$fd10 = fopen('infos/info_10', 'r');
+$fd11 = fopen('infos/info_11', 'r');
+$fd12 = fopen('infos/info_12', 'r');
+$fd13 = fopen('infos/info_13', 'r');
+$fd14 = fopen('infos/info_14', 'r');
+$fd15 = fopen('infos/info_15', 'r');
+
+echo 'INSERT INTO `empresas` VALUES ';
+
+$array = array();
+while (($mat = fgets($fd0)) !== false) {
+    $id = trim($mat);
+    $name = trim(preg_replace(array('/&amp;lt;div&amp;gt;/','/&amp;lt;\/div&amp;gt;/', '/&quot;/'),array('','','\&quot;'),trim(fgets($fd1))));
+    $description = trim(preg_replace(array('/&amp;lt;\/div&amp;gt;/','/&quot;/'),array('','\&quot;'),trim(fgets($fd2))));
+    $type = trim(preg_replace(array('/&amp;lt;\/div&amp;gt;/','/&quot;/'),array('','\&quot;'),trim(fgets($fd3))));
+    $contact = trim(preg_replace(array('/&amp;lt;\/div&amp;gt;/','/&quot;/'),array('','\&quot;'),trim(fgets($fd4))));
+    $nit = trim(preg_replace(array('/&amp;lt;\/div&amp;gt;/','/&quot;/'),array('','\&quot;'),trim(fgets($fd5))));
+    $license = trim(preg_replace(array('/&amp;lt;\/div&amp;gt;/','/&quot;/'),array('','\&quot;'),trim(fgets($fd6))));
+    $depto = trim(preg_replace(array('/&amp;lt;\/div&amp;gt;/','/&quot;/'),array('','\&quot;'),trim(fgets($fd7))));
+    $mun = trim(preg_replace(array('/&amp;lt;div&amp;gt;/','/&amp;lt;\/div&amp;gt;/'),array('',''),trim(fgets($fd8))));
+    $address = trim(preg_replace(array('/&amp;lt;\/div&amp;gt;/','/&quot;/'),array('','\&quot;'),trim(fgets($fd9))));
+    $phone = trim(preg_replace(array('/&amp;lt;\/div&amp;gt;/','/&quot;/'),array('','\&quot;'),trim(fgets($fd10))));
+    $fax = trim(preg_replace(array('/&amp;lt;\/div&amp;gt;/','/&quot;/'),array('','\&quot;'),trim(fgets($fd11))));
+    $email = trim(preg_replace(array('/&amp;lt;\/div&amp;gt;/','/&quot;/'),array('','\&quot;'),trim(fgets($fd12))));
+    $act_general = trim(preg_replace(array('/&amp;lt;\/div&amp;gt;/','/&quot;/'),array('','\&quot;'),trim(fgets($fd13))));
+    $act_primary = trim(preg_replace(array('/&amp;lt;\/div&amp;gt;/','/&quot;/'),array('','\&quot;'),trim(fgets($fd14))));
+    $act_especific = trim(preg_replace(array('/&amp;lt;\/div&amp;gt;/','/&quot;/'),array('','\&quot;'),trim(fgets($fd15))));
+    $array[] = &quot;(\&quot;$id\&quot;,\&quot;$name\&quot;,\&quot;$description\&quot;,\&quot;$type\&quot;,\&quot;$contact\&quot;,\&quot;$nit\&quot;,\&quot;$license\&quot;,\&quot;$depto\&quot;,\&quot;$mun\&quot;,\&quot;$address\&quot;,\&quot;$phone&quot;,\&quot;$fax\&quot;,\&quot;$email\&quot;,\&quot;$act_general\&quot;,\&quot;$act_primary\&quot;,\&quot;$act_especific\&quot;)&quot;;
+}
+
+echo implode(',',$array) . ';';
+
+fclose($fd0);
+fclose($fd1);
+fclose($fd2);
+fclose($fd3);
+fclose($fd4);
+fclose($fd5);
+fclose($fd6);
+fclose($fd7);
+fclose($fd8);
+fclose($fd9);
+fclose($fd10);
+fclose($fd11);
+fclose($fd12);
+fclose($fd13);
+fclose($fd14);
+fclose($fd15);</code></pre>
+
+Luego de eso escribí un archivo sql final con varias correcciones sobre la información, que considere apropiadas.
+
+<pre class="prettyprint lang-sql linenums"><code>UPDATE empresas SET act_general = '' WHERE act_general = '&amp;amp;lt;a href=&amp;quot;javascript:history.go(-1);&amp;quot; target=&amp;quot;_self&amp;quot; title=&amp;quot;Listado de b&amp;amp;amp;uacute;squeda&amp;quot;&amp;amp;gt;Volver al listado de la b&amp;amp;amp;uacute;squeda&amp;amp;lt;/a&amp;amp;gt;';
+UPDATE empresas SET tipo = '' WHERE tipo = 'Información no registrada';
+UPDATE empresas SET contacto = '' WHERE contacto = 'Información no registrada';
+UPDATE empresas SET nit = '' WHERE nit = 'Información no registrada';
+UPDATE empresas SET licencia = '' WHERE licencia = 'Información no registrada';
+UPDATE empresas SET depto = '' WHERE depto = 'Información no registrada';
+UPDATE empresas SET municipio = '' WHERE municipio = 'Información no registrada';
+UPDATE empresas SET direccion = '' WHERE direccion = 'Información no registrada';
+UPDATE empresas SET telefono = '' WHERE telefono = 'Información no registrada';
+UPDATE empresas SET fax = '' WHERE fax = 'Información no registrada';
+UPDATE empresas SET email = '' WHERE email = 'Información no registrada';
+UPDATE empresas SET act_general = '' WHERE act_general = 'Información no registrada';
+UPDATE empresas SET act_primaria = '' WHERE act_primaria = 'Información no registrada';
+UPDATE empresas SET act_especifica = '' WHERE act_especifica = 'Información no registrada';
+INSERT INTO tipo SELECT DISTINCT tipo FROM empresas;
+INSERT INTO act_general SELECT DISTINCT act_general FROM empresas;
+INSERT INTO act_primaria SELECT DISTINCT act_primaria FROM empresas;
+INSERT INTO act_especifica SELECT DISTINCT act_especifica FROM empresas;
+DELETE FROM tipo WHERE tipo IN ('EMPRESA UNIPERSONAL','SOCIEDAD CONSTITUIDA EN EL EXTRANJERO','SOCIEDAD COLECTIVA');
+DELETE FROM act_general WHERE act_general IN ('CONSTRUCCIoN','EXPLOTACIoN DE MINAS Y CANTERAS','SERVICIOS COMUNITARIOS, SOCIALES Y PERSONALES','HOTELES Y RESTAURANTES','SERVICIOS SOCIALES Y DE SALUD','INTERMEDIACIoN FINANCIERA','AGRICULTURA, GANADERiA, CAZA Y SILVICULTURA','SUMINISTRO DE ELECTRICIDAD, GAS Y AGUA','PESCA');
+DELETE FROM act_primaria WHERE act_primaria IN (
+'19-CURTIDO Y ADOBO DE CUEROS; FABRICACIoN DE MALETAS, BOLSOS DE MANO, ARTiCULOS DE TALABARTERiA Y GUARDICIONERiA Y CALZADO',
+'15-ELABORACIoN DE PRODUCTOS ALIMENTICIOS Y BEBIDAS',
+'45-CONSTRUCCIoN',
+'50-VENTA, MANTENIMIENTO Y REPARACIoN DE VEHiCULOS AUTOMOTORES Y MOTOCICLETAS; VENTA POR MENOR DE COMBUSTIBLE PARA AUTOMOTORES',
+'13-EXTRACCIoN DE MINERALES METaLICOS',
+'21-FABRICACIoN DE PAPEL Y DE PRODUCTOS DE PAPEL',
+'55-HOTELES Y RESTAURANTES',
+'20-PRODUCCIoN DE MADERA Y FABRICACIoN DE PRODUCTOS DE MADERA Y CORCHO, EXCEPTO MUEBLES, FABRICACIoN DE ARTiCULOS DE PAJA Y DE MATERIALES TRENZABLES',
+'36-FABRICACIoN DE MUEBLES; INDUSTRIAS MANUFACTURERAS n.c.p.',
+'92-ACTIVIDADES DE ESPARCIMIENTO Y ACTIVIDADES CULTURALES Y DEPORTIVAS',
+'14-EXPLOTACIoN DE OTRAS MINAS Y CANTERAS',
+'18-FABRICACIoN DE PRENDAS DE VESTIR, ADOBO Y TEnIDO DE PIELES',
+'61-TRANSPORTE POR ViA ACUaTICA',
+'28-FABRICACIoN DE PRODUCTOS ELABORADOS DE METAL, EXCEPTO MAQUINARIA Y EQUIPO',
+'60-TRANSPORTE POR ViA TERRESTRE; TRANSPORTE POR TUBERiAS',
+'85-SERVICIOS SOCIALES Y DE SALUD',
+'71-ALQUILER DE MAQUINARIA Y EQUIPO SIN OPERARIOS Y DE EFECTOS PERSONALES Y ENSERES DOMeSTICOS',
+'63-SERVICIOS COMPLEMENTARIOS Y AUXILIARES DEL TRANSPORTE; ACTIVIDADES DE AGENCIAS DE VIAJE',
+'31-FABRICACIoN DE MAQUINARIA Y APARATOS ELeCTRICOS n.c.p.',
+'24-FABRICACIoN DE SUSTANCIAS Y PRODUCTOS QUiMICOS',
+'66-SERVICIOS DE SEGUROS Y DE ADMINISTRACIoN DE FONDOS DE JUBILACIONES Y PENSIONES, EXCEPTO LOS PLANES DE SEGURIDAD SOCIAL DE AFILIACIoN OBLIGATORIA',
+'22-ACTIVIDADES DE EDICION E IMPRESIoN Y DE REPRODUCCIoN DE GRABACIONES',
+'01-AGRICULTURA, GANADERiA, CAZA Y SERVICIOS CONEXOS',
+'65-INTERMEDIACION FINANCIERA, EXCEPTO PLANES DE SEGUROS Y DE ADMINISTRACIoN DE FONDOS DE JUBILACIONES Y PENSIONES',
+'26-FABRICACIoN DE OTROS PRODUCTOS MINERALES NO METaLICOS',
+'70-SERVICIOS INMOBILIARIOS',
+'27-FABRICACIoN DE METALES COMUNES',
+'33-FABRICACIoN DE INSTRUMENTOS MeDICOS, oPTICOS Y DE PRECISIoN Y FABRICACIoN DE RELOJES',
+'25-FABRICACIoN DE PRODUCTOS DE CAUCHO Y PLaSTICO',
+'02-SILVICULTURA, EXTRACCIoN DE MADERA Y ACTIVIDADES DE SERVICIOS CONEXAS',
+'29-FABRICACIoN DE MAQUINARIA Y EQUIPO n.c.p.',
+'41-CAPTACIoN, DEPURACIoN Y DISTRIBUCIoN DE AGUA',
+'40-SUMINISTRO DE ELECTRICIDAD, GAS, VAPOR Y AGUA CALIENTE',
+'17-FABRICACIoN DE PRODUCTOS TEXTILES',
+'34-FABRICACIoN DE VEHiCULOS AUTOMOTORES, REMOLQUES Y SEMIREMOLQUES',
+'67-SERVICIOS AUXILIARES DE LA INTERMEDIACIoN FINANCIERA',
+'37-RECICLAMIENTO',
+'23-FABRICACIoN DE COQUE, PRODUCTOS DE LA REFINACIoN DEL PETRoLEO Y COMBUSTIBLE NUCLEAR',
+'35-FABRICACIoN DE OTROS TIPOS DE EQUIPO DE TRANSPORTE',
+'62-SERVICIO DE TRANSPORTE POR ViA AeREA',
+'11-EXTRACCIoN DE PETRoLEO CRUDO Y GAS NATURAL;  ACTIVIDADES DE SERVICIOS RELACIONADAS CON LA EXTRACCIoN DE PETRoLEO Y GAS, EXCEPTO LAS ACTIVIDADES DE PROSPECCIoN',
+'05-PESCA, ACUICULTURA Y ACTIVIDADES DE SERVICIOS RELACIONADAS CON LA PESCA');
+INSERT INTO empresa_filtro SELECT * FROM empresas WHERE tipo IN (SELECT tipo FROM tipo) AND act_general IN (SELECT act_general FROM act_general) AND act_primaria IN (SELECT act_primaria FROM act_primaria);</code></pre>
+
+El producto final de todas estas cuestiones, resulta ineludiblemente a este archivo: [fundempresa.tar.bz2](http://yachay.scesi.org/files/78/download) Así que diremos que no fue fácil para mi, no fue rápido, pero si que fue muy divertido, en especial los wget, jaja, tardaron casi todo un día.
+
+Y así fue como un muchacho con ip publica, gozo de la inocencia infausta del 2011; a la larga descubrió que a algunas personas les importo lo que el había construido, para variar de las demás cosas que tenia para dar. Pero como siempre decimos, esa es otra historia.

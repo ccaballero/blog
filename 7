@@ -1,0 +1,394 @@
+Una de las grandes ventajas de GNU/Linux respecto de Windows, es su alta versatilidad a la hora de poder escoger herramientas, basta con ver la amplia cantidad de paquetes para saber que puedes cambiar cualquier componente que tu decidas, bueno al menos así veo yo a GNU/Linux, así es como parece que funciona para mi.
+
+Uno de estos muchos casos, es aquel referido a la gran cantidad de [gestores de ventanas](https://es.wikipedia.org/wiki/Gestor_de_ventanas) y [entornos de escritorio](https://es.wikipedia.org/wiki/Entorno_de_escritorio) que pueden utilizarse en X Window, hoy que ando algo frito de tiempo (como todos, por lo visto), contare mis experiencias con uno de esos gestores de ventanas que use, y que todavía uso en mi cotidianidad.
+
+<!--more-->
+
+Para una inspección consciente sobre lo que es justo y necesario para poder encontrar el escritorio de tus sueños puedes intentar ver si tal vez por ahí, puede ser que este en, nose, tal vez, [aquip](http://xwinman.org/).
+
+AwesomeWM
+=========
+
+[Awesome](http://awesome.naquadah.org/) tiene eso que yo aprecio en un gestor de ventanas:
+
+* Escritorios virtuales, 9 por defecto, pero con potencialidades para hacer que ese comportamiento sea diferente.
+* Ventanas en mosaico, si es que así se dice, me refiero a que las ventanas de un escritorio pueden estar acomodadas de tal forma que el trabajo para ellas sea mas eficaz.
+* Minimización del uso del ratón, para actividades harto repetitivas.
+
+El objeto de mis escritos actuales, a parte de hacer hora aquí en mi clase de Ginga, es convertir la configuración por defecto, con la que viene awesome, y transformarla en algo mas. Vale decir transformar la imagen de la figura 1, en la imagen de la figura 2.
+
+![awesome01](http://blog.scesi.org/wp-content/uploads/2013/04/awesome01.png "Awesome de origen")
+![awesome02](http://blog.scesi.org/wp-content/uploads/2013/04/awesome02.png "Awesome como a mi me gusta")
+
+Recuerdo que la noche que conseguí por fin tener tiempo para probar awesome, quede muy asombrado. Era en los tiempos en los que tenia la consumada intención de aprender acerca de como funcionan todos los gestores de ventanas y escritorios que pudiese instalar; ya había probado xfce4, los clasicos GNOME, y KDE, OpenBox, y Fluxbox; aun deseando probar LXDE, y darle alguna chance a [Enlightenment](https://es.wikipedia.org/wiki/Enlightenment) (uno de mis favoritos en antaño).
+
+Pero desde ese día, solo uso Awesome, es raro, aun ahora veo a este escritorio como la herramienta que necesitaba para mi adecuada programación.
+
+Ahora si vamos por pasos:
+
+Ah, olvide mencionar anteriormente, que no describiré la forma de instalar, porque de instalaciones ya hemos hablado, e igual o peor de aburrido fue, consumadas las ansias, referidos los detalles, insensatos los motivos; hoy y ahora prefiero ir al grano, de todas maneras a nadie le importa nada.
+
+Paso 1:
+-------
+
+La primera cosa que tuve que realizar fue entender como se obtiene una terminal. Así que hice clic derecho y taran, un popup menu, para sacar la terminal. Y bueno mi primera tarea fue ver si habían otros temas para cambiar a mi awesome. Así que revise el manual y me culturice en los atajos de teclado que tiene este gestor de ventanas.
+
+Luego de leer el manual, supe que existen temas, y que de hecho mi instalación contaba con 3 temas para probar.
+
+Y la configuración por defecto esta en /etc/xdg/awesome, al menos ahí lo veo en mi FOS GNU/Linux y en mi Gentoo; ahora y viendo a detalle el archivo, veo como cambiar de tema.
+
+En el archivo /etc/xdg/awesome/rc.lua próxima a la linea 37, podemos apreciar:
+
+<pre class="prettyprint linenums lang-lua"><code>-- {{{ Variable definitions
+-- Themes define colours, icons, and wallpapers
+beautiful.init("/usr/share/awesome/themes/default/theme.lua")</code></pre>
+
+Ahora pruebo mis otros temas pre-instalados, cambiando esa linea (la parte que dice default por el nombre del tema):
+
+### sky
+![awesome03](http://blog.scesi.org/wp-content/uploads/2013/04/awesome03.png "Awesome con tema Sky")
+
+### zenburn
+![awesome04](http://blog.scesi.org/wp-content/uploads/2013/04/awesome04.png "Awesome con tema Zenburn")
+
+Paso 2:
+-------
+
+Ya encarrilado sobre los temas de awesome, creare mi propio tema basado en el tema Zenburn, así que, copio las configuraciones ubicadas en /usr/share/awesome/themes/zenburn/theme.lua.
+
+Y sas, las copio. Para hacerlo mas didáctico, a la terminal me remito:
+
+<pre class="prettyprint linenums lang-sh"><code>mkdir --parents ~/.config/awesome/
+cp /usr/share/awesome/themes/zenburn/theme.lua ~/.config/awesome/theme.lua
+cp /etc/xdg/awesome/rc.lua ~/.config/awesome/rc.lua</code></pre>
+
+Una vez copiados los archivos, configuro la invocación al tema en el archivo rc.lua y lo dejo como se nuestra a continuación:
+
+<pre class="prettyprint linenums lang-lua"><code>-- {{{ Variable definitions
+-- Themes define colours, icons, and wallpapers
+beautiful.init("/home/jacobian/.config/awesome/theme.lua")</code></pre>
+
+Reinicio, y parece que todo sigue correcto.
+
+Paso 3:
+-------
+
+Ahora mi siguiente objetivo es bajar la fucking barrita de herramientas, así que a leer lua caray!
+
+Aja!, lo encontré en la linea 168.
+
+<pre class="prettyprint linenums lang-lua"><code>    -- Create the wibox
+    mywibox[s] = awful.wibox({ position = "top", screen = s })</code></pre>
+
+Sospechoso, sospechoso, ahora a probar una cambiada de parámetros.
+
+<pre class="prettyprint linenums lang-lua"><code>    -- Create the wibox
+    mywibox[s] = awful.wibox({ position = "bottom", screen = s })</code></pre>
+
+Y voilà!, ya se bajo la wea.
+
+![awesome05](http://blog.scesi.org/wp-content/uploads/2013/04/awesome05.png "awesome con barra en la parte inferior")
+
+Paso 4:
+-------
+
+Ahora le pondré una imagen mas de mi estilo personal, así que sospecho, intuyo, conspiro y me digo a mi mismo, mmmm, debe de ser en el archivo theme.lua.
+
+Encontré la imagen en [aquip](http://wallpaperpassion.com/download-wallpaper/6646/black-and-white-cat-wallpaper.html). Descargo la imagen y la copio junto a mis configuraciones de awesome.
+
+Y ahí esta, en la linea 10:
+
+<pre class="prettyprint linenums lang-lua"><code>-- {{{ Main
+theme = {}
+theme.wallpaper_cmd = { "awsetbg /usr/share/awesome/themes/zenburn/zenburn-background.png" }
+-- }}}</code></pre>
+
+Y lo cambio por:
+
+<pre class="prettyprint linenums lang-lua"><code>-- {{{ Main
+theme = {}
+theme.wallpaper_cmd = { "awsetbg /home/jacobian/.config/awesome/background_1366x768.jpg" }
+-- }}}</code></pre>
+
+Y ahora se ve mas como me gusta:
+
+![awesome06](http://blog.scesi.org/wp-content/uploads/2013/04/awesome06.png "awesome con gatos")
+
+Paso 5:
+-------
+
+Ahora tengo tres quejas:
+
+* No me gusta que tenga 9 escritorios, me parece abrumante, quiero tener solamente 5.
+* No quiero ver el reloj, me pone ansioso, quiero que desaparezca.
+* Solo necesito unos pocos modos de mosaico, tener tanto también me agobia.
+
+Para el primer caso, busco en la configuración, encuentro y reemplazo:
+
+<pre class="prettyprint linenums lang-lua"><code>-- {{{ Tags
+-- Define a tag table which hold all screen tags.
+tags = {}
+for s = 1, screen.count() do
+    -- Each screen has its own tag table.
+    tags[s] = awful.tag({ 1, 2, 3, 4, 5, 6, 7, 8, 9 }, s, layouts[1])
+end
+-- }}}</code></pre>
+
+<pre class="prettyprint linenums lang-lua"><code>-- {{{ Tags
+-- Define a tag table which hold all screen tags.
+tags = {}
+for s = 1, screen.count() do
+    -- Each screen has its own tag table.
+    tags[s] = awful.tag({ 1, 2, 3, 4, 5 }, s, layouts[1])
+end
+-- }}}</code></pre>
+
+![awesome07](http://blog.scesi.org/wp-content/uploads/2013/04/awesome07.png "awesome con 5 escritorios")
+
+Para quitar el reloj, encuentro y destruyo:
+
+<pre class="prettyprint linenums lang-lua"><code>-- {{{ Wibox
+-- Create a textclock widget
+mytextclock = awful.widget.textclock({ align = "right" })</code></pre>
+
+Pero esa es la declaración, necesito quitar solo la parte en la que se inserta en la barra:
+
+<pre class="prettyprint linenums lang-lua"><code>    -- Create the wibox
+    mywibox[s] = awful.wibox({ position = "bottom", screen = s })
+    -- Add widgets to the wibox - order matters
+    mywibox[s].widgets = {
+        {
+            mylauncher,
+            mytaglist[s],
+            mypromptbox[s],
+            layout = awful.widget.layout.horizontal.leftright
+        },
+        mylayoutbox[s],
+        mytextclock,
+        s == 1 and mysystray or nil,
+        mytasklist[s],
+        layout = awful.widget.layout.horizontal.rightleft
+    }</code></pre>
+
+La encuentro y la remuevo:
+
+<pre class="prettyprint linenums lang-lua"><code>    -- Create the wibox
+    mywibox[s] = awful.wibox({ position = "bottom", screen = s })
+    -- Add widgets to the wibox - order matters
+    mywibox[s].widgets = {
+        {
+            mylauncher,
+            mytaglist[s],
+            mypromptbox[s],
+            layout = awful.widget.layout.horizontal.leftright
+        },
+        mylayoutbox[s],
+        s == 1 and mysystray or nil,
+        mytasklist[s],
+        layout = awful.widget.layout.horizontal.rightleft
+    }</code></pre>
+
+Para resolver lo de los mosaicos, veamos que modos hay:
+
+<pre class="prettyprint linenums lang-lua"><code>-- Table of layouts to cover with awful.layout.inc, order matters.
+layouts =
+{
+    awful.layout.suit.floating,
+    awful.layout.suit.tile,
+    awful.layout.suit.tile.left,
+    awful.layout.suit.tile.bottom,
+    awful.layout.suit.tile.top,
+    awful.layout.suit.fair,
+    awful.layout.suit.fair.horizontal,
+    awful.layout.suit.spiral,
+    awful.layout.suit.spiral.dwindle,
+    awful.layout.suit.max,
+    awful.layout.suit.max.fullscreen,
+    awful.layout.suit.magnifier
+}
+-- }}}</code></pre>
+
+Siendo un poquitin mas gráficos:
+
+### awful.layout.suit.floating
+![awesome08](http://blog.scesi.org/wp-content/uploads/2013/04/awesome08.png "")
+### awful.layout.suit.tile
+![awesome09](http://blog.scesi.org/wp-content/uploads/2013/04/awesome09.png "")
+### awful.layout.suit.tile.left
+![awesome10](http://blog.scesi.org/wp-content/uploads/2013/04/awesome10.png "")
+### awful.layout.suit.tile.bottom
+![awesome11](http://blog.scesi.org/wp-content/uploads/2013/04/awesome11.png "")
+### awful.layout.suit.tile.top
+![awesome12](http://blog.scesi.org/wp-content/uploads/2013/04/awesome12.png "")
+### awful.layout.suit.fair
+![awesome13](http://blog.scesi.org/wp-content/uploads/2013/04/awesome13.png "")
+### awful.layout.suit.fair.horizontal
+![awesome14](http://blog.scesi.org/wp-content/uploads/2013/04/awesome14.png "")
+### awful.layout.suit.spiral
+![awesome15](http://blog.scesi.org/wp-content/uploads/2013/04/awesome15.png "")
+### awful.layout.suit.spiral.dwindle
+![awesome16](http://blog.scesi.org/wp-content/uploads/2013/04/awesome16.png "")
+### awful.layout.suit.max
+![awesome17](http://blog.scesi.org/wp-content/uploads/2013/04/awesome17.png "")
+### awful.layout.suit.max.fullscreen
+![awesome18](http://blog.scesi.org/wp-content/uploads/2013/04/awesome18.png "")
+### awful.layout.suit.magnifier
+![awesome19](http://blog.scesi.org/wp-content/uploads/2013/04/awesome19.png "")
+
+Escogo los que me parecen mas utiles, y lo dejo asip:
+
+<pre class="prettyprint linenums lang-lua"><code>-- Table of layouts to cover with awful.layout.inc, order matters.
+layouts =
+{
+    awful.layout.suit.floating,
+    awful.layout.suit.tile,
+    --awful.layout.suit.tile.left,
+    --awful.layout.suit.tile.bottom,
+    awful.layout.suit.tile.top,
+    --awful.layout.suit.fair,
+    awful.layout.suit.fair.horizontal,
+    --awful.layout.suit.spiral,
+    --awful.layout.suit.spiral.dwindle,
+    --awful.layout.suit.max,
+    --awful.layout.suit.max.fullscreen,
+    awful.layout.suit.magnifier
+}
+-- }}}</code></pre>
+
+Ahhhh, mucho mejor, 5 modalidades, menos estresante para mi cerebro.
+
+Paso 6:
+-------
+
+Ahora lo que yo quiero es configurar los colores (el verde zenburn no es lo mio), y los iconos. Y de probar y testear cambio el archivo theme.lua, a su nueva forma original, muestro las partes mas sobresalientes:
+
+<pre class="prettyprint linenums lang-lua"><code>-- {{{ Styles
+theme.font      = "sans 8"
+
+color1 = "#000000"
+color2 = "#707070"
+color3 = "#FFFFFF"
+
+-- {{{ Colors
+theme.fg_normal = color2
+theme.fg_focus  = color1
+theme.fg_urgent = color1
+
+theme.bg_normal = color1
+theme.bg_focus  = color2
+theme.bg_urgent = color3
+-- }}}
+
+-- {{{ Borders
+theme.border_width  = "3"
+theme.border_normal = color1
+theme.border_focus  = color3
+theme.border_marked = color2
+-- }}}
+
+-- There are other variable sets
+-- overriding the default one when
+-- defined, the sets are:
+-- [taglist|tasklist]_[bg|fg]_[focus|urgent]
+-- titlebar_[normal|focus]
+-- tooltip_[font|opacity|fg_color|bg_color|border_width|border_color]
+-- Example:
+theme.taglist_bg_focus = color1
+theme.taglist_fg_focus = color3
+-- }}}
+
+-- {{{ Menu
+-- Variables set for theming the menu:
+-- menu_[bg|fg]_[normal|focus]
+-- menu_[border_color|border_width]
+theme.menu_height = "15"
+-- theme.menu_width  = "100"
+-- }}}
+
+theme.terminal_icon = "/usr/share/icons/AwOkenWhite/clear/128x128/apps/terminal.png"
+theme.chromium_icon = "/usr/share/icons/AwOkenWhite/clear/128x128/apps/chromium-browser.png"
+theme.pidgin_icon = "/usr/share/icons/AwOkenWhite/clear/128x128/apps/pidgin.png"
+theme.liferea_icon = "/usr/share/icons/AwOkenWhite/clear/128x128/apps/liferea.png"
+theme.firefox_icon = "/usr/share/icons/AwOkenWhite/clear/128x128/apps/firefox.png"
+theme.thunar_icon = "/usr/share/icons/AwOkenWhite/clear/128x128/apps/thunar.png"
+theme.gmpc_icon = "/usr/share/icons/AwOkenWhite/clear/128x128/apps/gmpc.png"
+theme.mplayer_icon = "/usr/share/icons/AwOkenWhite/clear/128x128/apps/mplayer.png"
+theme.vlc_icon = "/usr/share/icons/AwOkenWhite/clear/128x128/apps/vlc.png"
+theme.netbeans_icon = "/usr/share/icons/AwOkenWhite/clear/128x128/apps/netbeans.png"
+theme.transmission_icon = "/usr/share/icons/AwOkenWhite/clear/128x128/apps/transmission.png"</code></pre>
+
+Así es colores oscuros, monocromática obscena, ademas agrege iconos del set de iconos [AwOkenWhite](http://alecive.deviantart.com/art/AwOkenWhite-Preview-264500086), lindos iconos.
+
+Paso 7:
+-------
+
+Ya cambiados los iconos, solo me falta el menu, yo siempre he preferido tener accesos a los programas que mas utilizo, asi que configuro mi menus para tal fin, en rc.lua:
+
+<pre class="prettyprint linenums lang-lua"><code>-- {{{ Menu
+-- Create a laucher widget and a main menu
+app_thunar = "thunar"
+app_chromium = "chromium"
+app_firefox = "firefox"
+app_pidgin = "pidgin"
+app_gmpc = "gmpc"
+app_transmission = "transmission-gtk"
+app_php_netbeans = "/opt/netbeans-7.3-php/bin/netbeans"
+app_java_netbeans = "/opt/netbeans-7.3-java/bin/netbeans"
+
+mymainmenu = awful.menu({ items = { --{ "awesome", myawesomemenu, beautiful.awesome_icon },
+                                    { "terminal",      terminal,          beautiful.terminal_icon },
+				    { "thunar",        app_thunar,        beautiful.thunar_icon },
+				    { "chromium ",     app_chromium,      beautiful.chromium_icon },
+				    { "firefox",       app_firefox,       beautiful.firefox_icon },
+				    { "pidgin",        app_pidgin,        beautiful.pidgin_icon },
+				    { "gmpc",          app_gmpc,          beautiful.gmpc_icon },
+				    { "PHP netbeans",  app_php_netbeans,  beautiful.netbeans_icon },
+				    { "Java netbeans", app_java_netbeans, beautiful.netbeans_icon },
+				    { "reiniciar",     awesome.restart },
+				    { "salir",         awesome.quit }
+                                  }
+                        })</code></pre>
+
+Paso 8:
+-------
+
+Ahora me creo unos accesos directos útiles:
+
+<pre class="prettyprint linenums lang-lua"><code>    -- open thunar on fly
+    awful.key({ modkey,           }, "e",      function () awful.util.spawn(app_thunar) end),
+
+    -- mpc controls
+    awful.key({ "Mod1", "Control" }, "Insert", function () awful.util.spawn_with_shell("mpc toggle") end),
+    awful.key({ "Mod1", "Control" }, "Home",   function () awful.util.spawn_with_shell("mpc stop") end),
+    awful.key({ "Mod1", "Control" }, "End",    function () awful.util.spawn(app_gmpc) end),
+    awful.key({ "Mod1", "Control" }, "Prior",  function () awful.util.spawn_with_shell("mpc prev") end),
+    awful.key({ "Mod1", "Control" }, "Next",   function () awful.util.spawn_with_shell("mpc next") end),
+
+    -- keys on my keyboard for alsa
+    awful.key({                   }, "XF86AudioMute", function () awful.util.spawn_with_shell("amixer sset Master toggle") end),
+    awful.key({                   }, "XF86AudioLowerVolume", function () awful.util.spawn_with_shell("amixer -q sset Master 5-") end),
+    awful.key({                   }, "XF86AudioRaiseVolume", function () awful.util.spawn_with_shell("amixer -q sset Master 5+") end),
+
+    awful.key({                   }, "XF86AudioPrev", function () awful.util.spawn_with_shell("mpc prev") end),
+    awful.key({                   }, "XF86AudioPlay", function () awful.util.spawn_with_shell("mpc toggle") end),
+    awful.key({                   }, "XF86AudioNext", function () awful.util.spawn_with_shell("mpc next") end),
+</code></pre>
+
+Paso 9:
+-------
+
+Para terminar escribo basado en este [manual](https://wiki.archlinux.org/index.php/Awesome#Autorun_programs), como ejecutar mi conky automáticamente:
+
+<pre class="prettyprint linenums lang-lua"><code>function run_once(prg)
+    awful.util.spawn_with_shell("pgrep -u $USER -x " .. prg .. " || (" .. prg .. ")")
+end
+
+run_once("conky")</code></pre>
+
+Y listo, ya quedo como me gusta....
+
+![awesome20](http://blog.scesi.org/wp-content/uploads/2013/04/awesome20.png "")
+
+Termino recordando unas palabritas de Garcia Márquez:
+
+> "Sin embargo, antes de llegar al verso final, ya había comprendido que no saldría jamás de ese cuarto, pues estaba previsto que la ciudad de los espejos (o espejismos) sería arrasada por el viento y desterrada de la memoria de los hombres, en el instante en que Aureliano Babilonia acabara de decifrar los pergaminos, y que todo lo escrito en ellos era irrepetible desde siempre y para siempre, porque los estirpes condenados a cien años de soledad no tenían una segunda oportunidad sobre la tierra."

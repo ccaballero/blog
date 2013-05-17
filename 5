@@ -1,0 +1,236 @@
+Corría el año 2013, la guerra terminada hacia algunos años, aun recalaba en los corazones de nosotros que la combatimos, ahí es donde entre la bruma y la leyenda, decidimos contar aquello que aprendimos en el tiempo transcurrido.
+
+Entre aquellos, uno mas que todos los otros sugirió un blog, podríamos decir que ese fue el punto cúspide donde nace el [BLOG SCESI](http://blog.scesi.org), ahora mismo a medio hacer; cuya pura intención era fundar las bases para una comunidad, una verdadera comunidad, no una comunidad de papeles y decires, sino mas bien una de intercambio de experiencias y construcción de algo común.
+
+Así fue que instalamos [wordpress](https://wordpress.org/), el clásico de todos los blogs, se crearon las cuentitas, y se pusieron las ahora controvertidas reglas para postear, todas con una intención y un sacrificio inicial, ahora casi olvidado y reinterpretado a placer por aquellos que estuvimos presentes.
+
+Varios días después, se comenzó a postear, por defecto wordpress tiene un editor para html, y estaba bueno; al menos a mis ojos estaba muy bueno. Pero de repente sas nuevamente, necesitamos algo para colocar código fuente, y que ademas ponga colores según la sintaxis que tenga esta.
+
+Primero llegue al post [15 Best Syntax Highlighter WordPress Plugins](http://www.wpsquare.com/syntax-highlighter-wordpress-plugins/), no recuerdo los entresijos por los que decidi entre uno y otro, pero al final probe [SyntaxHighlighter Evolved](http://wordpress.org/extend/plugins/syntaxhighlighter/), luego entre otros [http://wordpress.org/extend/plugins/syntaxhighlighter-plus/], recuerdo que existian algunos [problemas de
+indentación](http://www.bytehood.com/syntaxhighlighter-plus-wordpress-plugin-indentation-problems/274/), al fin y al cabo, se pudo hacer que identara correctamente, un poco sucio pero aceptable.
+
+Y ahí en plena felicidad por lo construido fue donde cae sugerencia de instalar Markdown para la edición, ninguneos mas ninguneos menos se intento instalar los plugins que fuesen necesarios.
+
+Empero preambulos insolentes, pasamos de repente a lo que nos concierne:
+
+¿Qué es pues eso de Markdown?
+=============================
+
+[Markdown](https://en.wikipedia.org/wiki/Markdown), como wikipedia indica, es un lenguaje de marcado ligero, algo parecido a como se escribe texto para las entradas de wikipedia, por ejemplo.
+
+Al principio considere, que puede ser que esto no valga la pena, Markdown digo, los usuarios normalmente no quieren saber nada mas que lo que ya creen saber. Así que predije que iba a ver mucha resistencia a los cambios.
+
+Pero ahora creo que Markdown esta bueno, en múltiples perspectivas.
+
+Ventaja #1
+----------
+
+Con un lenguaje de marcado ligero, el escritor se preocupa unicamente del texto que esta escribiendo y no de su presentación. Permitiendo tener un foco de atención casi exclusivo a la hora de escribir.
+
+Ventaja #2
+----------
+
+El texto siempre será legible en ambos sentidos, es decir, a la hora tanto en el momento de editarse, como en el momento de verse.
+
+Ventaja #3
+----------
+
+La mayor parte de las marcas que maneja Markdown, son tremendamente simples de recordar, haciendo esta una gran diferencia a la hora de escribir.
+
+Markdown para wordpress
+=======================
+
+En este momento de la historia me hallo convencido que Markdown es la solución para todos los bloggers, ahora solo necesito instalar lo que haga falta para que funcione bien.
+
+Se dice fácil...
+
+Intento #1
+----------
+
+Primero intentamos instalar [WP-Markdown](http://wordpress.org/extend/plugins/wp-markdown/), pasable el asunto, pero necesitábamos coloreo de sintaxis, o al menos uno satisfactorio.
+
+Intento #2
+----------
+
+Aquí es donde sufrimos mas, vimos que en cierto modo Markdown y wordpress, no estaban tan lindos como los que Ubaldino nos mostró en su [wiki](https://bitbucket.org/ubaldino/obi/wiki/Home) de BitBucket, indudablemente tenia un punto.
+
+Asi que instalamos [WP-Markdown](http://wordpress.org/extend/plugins/wp-markdown/installation/), pero todo el coloreo de sintaxis e indentación, se arruinaron, probamos con esto [CodeColorer comaptiblity with "Markdown for WordPress and bbPress"](http://wordpress.org/extend/plugins/codecolorer-markdown/installation/), y se arreglo a medias, ya que después de editar, todo se transformaba a HTML, y era imposible ver el código limpio, pues tenia ahora HTML donde antes había código.
+
+Ahí es donde dijimos todos, rayos!!!
+
+Intento #3
+----------
+
+Así que seguí buscando, hasta encontrar [Blogging in Markdown](http://digwp.com/2010/06/blogging-in-markdown/), siguiendo todos los pasos caimos en [PHP Markdown](http://michelf.ca/projects/php-markdown/), he instalamos el coloreo de sintaxis a partir de [Syntax-highlighted Markdown Blocks using Prettify in Wordpress](http://randomland.net/zourtney/2011/09/markdown-prettify-wordpress).
+
+Y así fue, puro google para nosotros, puro enlaces para ustedes.
+
+Sintaxis Markdown
+=================
+
+Si bien acerca de la sintaxis Markdown, mucho se ha hablado en el pasado, primero [aqui](http://es.wikipedia.org/wiki/Markdown), luego [aqui](http://michelf.ca/projects/php-markdown/concepts/), para terminar [aqui](http://daringfireball.net/projects/markdown/syntax).
+
+Pondré al final como es el código Markdown de este post (cuando lo termine), haciendo el detalle super recursivo, uajaja.
+
+Prettify
+========
+
+[Prettify](http://wordpress.org/extend/plugins/prettify-wordpress/), es el modo actual en el blog para colocar código fuente, hasta ahora no encontré problemas serios, el manual que seguí para esto es [Getting Started](http://code.google.com/p/google-code-prettify/wiki/GettingStarted).
+
+Ejemplo Prettify #1
+-------------------
+
+<pre>&lt;pre&gt;&lt;code&gt;echo 'Hola mundo'&lt;/code&gt;&lt;/pre&gt;</pre>
+
+<pre><code>echo 'Hola mundo'</code></pre>
+
+Ejemplo Prettify #2
+-------------------
+
+<pre>&lt;pre class="prettyprint"&gt;&lt;code&gt;echo 'Hola mundo'&lt;/code&gt;&lt;/pre&gt;</pre>
+
+<pre class="prettyprint"><code>echo 'Hola mundo'</code></pre>
+
+Ejemplo Prettify #3
+-------------------
+
+<pre>&lt;pre class="prettyprint lang-sh"&gt;&lt;code&gt;echo 'Hola mundo'&lt;/code&gt;&lt;/pre&gt;</pre>
+
+<pre class="prettyprint lang-sh"><code>echo 'Hola mundo'</code></pre>
+
+Ejemplo Prettify #4
+-------------------
+
+<pre>&lt;pre class="prettyprint lang-sh linenums"&gt;&lt;code&gt;echo 'Hola mundo'&lt;/code&gt;&lt;/pre&gt;</pre>
+
+<pre class="prettyprint lang-sh linenums"><code>echo 'Hola mundo'</code></pre>
+
+Markdown autoreferente
+======================
+
+Lo prometido es deuda dijeron, asi que aqui esta el codigo Markdown de este post.
+
+<pre>
+Corría el año 2013, la guerra terminada hacia algunos años, aun recalaba en los corazones de nosotros que la combatimos, ahí es donde entre la bruma y la leyenda, decidimos contar aquello que aprendimos en el tiempo transcurrido.
+
+Entre aquellos, uno mas que todos los otros sugirió un blog, podríamos decir que ese fue el punto cúspide donde nace el [BLOG SCESI](http://blog.scesi.org), ahora mismo a medio hacer; cuya pura intención era fundar las bases para una comunidad, una verdadera comunidad, no una comunidad de papeles y decires, sino mas bien una de intercambio de experiencias y construcción de algo común.
+
+Así fue que instalamos [wordpress](https://wordpress.org/), el clásico de todos los blogs, se crearon las cuentitas, y se pusieron las ahora controvertidas reglas para postear, todas con una intención y un sacrificio inicial, ahora casi olvidado y reinterpretado a placer por aquellos que estuvimos presentes.
+
+Varios días después, se comenzó a postear, por defecto wordpress tiene un editor para html, y estaba bueno; al menos a mis ojos estaba muy bueno. Pero de repente sas nuevamente, necesitamos algo para colocar código fuente, y que ademas ponga colores según la sintaxis que tenga esta.
+
+Primero llegue al post [15 Best Syntax Highlighter WordPress Plugins](http://www.wpsquare.com/syntax-highlighter-wordpress-plugins/), no recuerdo los entresijos por los que decidi entre uno y otro, pero al final probe [SyntaxHighlighter Evolved](http://wordpress.org/extend/plugins/syntaxhighlighter/), luego entre otros [http://wordpress.org/extend/plugins/syntaxhighlighter-plus/], recuerdo que existian algunos [problemas de
+indentación](http://www.bytehood.com/syntaxhighlighter-plus-wordpress-plugin-indentation-problems/274/), al fin y al cabo, se pudo hacer que identara correctamente, un poco sucio pero aceptable.
+
+Y ahí en plena felicidad por lo construido fue donde cae sugerencia de instalar Markdown para la edición, ninguneos mas ninguneos menos se intento instalar los plugins que fuesen necesarios.
+
+Empero preambulos insolentes, pasamos de repente a lo que nos concierne:
+
+¿Qué es pues eso de Markdown?
+=============================
+
+[Markdown](https://en.wikipedia.org/wiki/Markdown), como wikipedia indica, es un lenguaje de marcado ligero, algo parecido a como se escribe texto para las entradas de wikipedia, por ejemplo.
+
+Al principio considere, que puede ser que esto no valga la pena, Markdown digo, los usuarios normalmente no quieren saber nada mas que lo que ya creen saber. Así que predije que iba a ver mucha resistencia a los cambios.
+
+Pero ahora creo que Markdown esta bueno, en múltiples perspectivas.
+
+Ventaja #1
+----------
+
+Con un lenguaje de marcado ligero, el escritor se preocupa unicamente del texto que esta escribiendo y no de su presentación. Permitiendo tener un foco de atención casi exclusivo a la hora de escribir.
+
+Ventaja #2
+----------
+
+El texto siempre será legible en ambos sentidos, es decir, a la hora tanto en el momento de editarse, como en el momento de verse.
+
+Ventaja #3
+----------
+
+La mayor parte de las marcas que maneja Markdown, son tremendamente simples de recordar, haciendo esta una gran diferencia a la hora de escribir.
+
+Markdown para wordpress
+=======================
+
+En este momento de la historia me hallo convencido que Markdown es la solución para todos los bloggers, ahora solo necesito instalar lo que haga falta para que funcione bien.
+
+Se dice fácil...
+
+Intento #1
+----------
+
+Primero intentamos instalar [WP-Markdown](http://wordpress.org/extend/plugins/wp-markdown/), pasable el asunto, pero necesitábamos coloreo de sintaxis, o al menos uno satisfactorio.
+
+Intento #2
+----------
+
+Aquí es donde sufrimos mas, vimos que en cierto modo Markdown y wordpress, no estaban tan lindos como los que Ubaldino nos mostró en su [wiki](https://bitbucket.org/ubaldino/obi/wiki/Home) de BitBucket, indudablemente tenia un punto.
+
+Asi que instalamos [WP-Markdown](http://wordpress.org/extend/plugins/wp-markdown/installation/), pero todo el coloreo de sintaxis e indentación, se arruinaron, probamos con esto [CodeColorer comaptiblity with "Markdown for WordPress and bbPress"](http://wordpress.org/extend/plugins/codecolorer-markdown/installation/), y se arreglo a medias, ya que después de editar, todo se transformaba a HTML, y era imposible ver el código limpio, pues tenia ahora HTML donde antes había código.
+
+Ahí es donde dijimos todos, rayos!!!
+
+Intento #3
+----------
+
+Así que seguí buscando, hasta encontrar [Blogging in Markdown](http://digwp.com/2010/06/blogging-in-markdown/), siguiendo todos los pasos caimos en [PHP Markdown](http://michelf.ca/projects/php-markdown/), he instalamos el coloreo de sintaxis a partir de [Syntax-highlighted Markdown Blocks using Prettify in Wordpress](http://randomland.net/zourtney/2011/09/markdown-prettify-wordpress).
+
+Y así fue, puro google para nosotros, puro enlaces para ustedes.
+
+Sintaxis Markdown
+=================
+
+Si bien acerca de la sintaxis Markdown, mucho se ha hablado en el pasado, primero [aqui](http://es.wikipedia.org/wiki/Markdown), luego [aqui](http://michelf.ca/projects/php-markdown/concepts/), para terminar [aqui](http://daringfireball.net/projects/markdown/syntax).
+
+Pondré al final como es el código Markdown de este post (cuando lo termine), haciendo el detalle super recursivo, uajaja.
+
+Prettify
+========
+
+[Prettify](http://wordpress.org/extend/plugins/prettify-wordpress/), es el modo actual en el blog para colocar código fuente, hasta ahora no encontré problemas serios, el manual que seguí para esto es [Getting Started](http://code.google.com/p/google-code-prettify/wiki/GettingStarted).
+
+Ejemplo Prettify #1
+-------------------
+
+&lt;pre&gt;&amp;lt;pre&amp;gt;&amp;lt;code&amp;gt;echo 'Hola mundo'&amp;lt;/code&amp;gt;&amp;lt;/pre&amp;gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code&gt;echo 'Hola mundo'&lt;/code&gt;&lt;/pre&gt;
+
+Ejemplo Prettify #2
+-------------------
+
+&lt;pre&gt;&amp;lt;pre class="prettyprint"&amp;gt;&amp;lt;code&amp;gt;echo 'Hola mundo'&amp;lt;/code&amp;gt;&amp;lt;/pre&amp;gt;&lt;/pre&gt;
+
+&lt;pre class="prettyprint"&gt;&lt;code&gt;echo 'Hola mundo'&lt;/code&gt;&lt;/pre&gt;
+
+Ejemplo Prettify #3
+-------------------
+
+&lt;pre&gt;&amp;lt;pre class="prettyprint lang-sh"&amp;gt;&amp;lt;code&amp;gt;echo 'Hola mundo'&amp;lt;/code&amp;gt;&amplt;/pre&amp;gt;&lt;/pre&gt;
+
+&lt;pre class="prettyprint lang-sh"&gt;&lt;code&gt;echo 'Hola mundo'&lt;/code&gt;&lt;/pre&gt;
+
+Ejemplo Prettify #4
+-------------------
+
+&lt;pre&gt;&amp;lt;pre class="prettyprint lang-sh linenums"&amp;gt;&amp;lt;code&amp;gt;echo 'Hola mundo'&amp;lt;/code&amp;gt;&amp;lt;/pre&amp;gt;&lt;/pre&gt;
+
+&lt;pre class="prettyprint lang-sh linenums"&gt;&lt;code&gt;echo 'Hola mundo'&lt;/code&gt;&lt;/pre&gt;
+
+Markdown autoreferente
+======================
+
+Lo prometido es deuda dijeron, asi que aqui esta el codigo Markdown de este post.
+
+-- AUTOREFERENT CODE IN SECOND LEVEL (not even once) --
+
+Y así transcurrieron los minutos, y estos se convirtieron en horas, y estos en días, la añoranza al pasado retoma en nuestros corazones, queriendo ser revivido a cada paso.
+
+Una lucha en cada día, una batalla a cada instante.
+</pre>
+
+Y así transcurrieron los minutos, y estos se convirtieron en horas, y estos en días, la añoranza al pasado retoma en nuestros corazones, queriendo ser revivido a cada paso.
+
+Una lucha en cada día, una batalla a cada instante.
+
